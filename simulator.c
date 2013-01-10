@@ -3,7 +3,7 @@
 #include <malloc.h>
 #include <stdlib.h>
 #define nreg 32 
-#define debug 1
+#define debug 0
 #define N & 0xff
 #define R(a) reg[ram[(reg[30] * 4) + a] & 0xff]
 #define V(a) (ram[(reg[30] * 4) + a] & 0xff)
@@ -292,7 +292,7 @@ int main(int args, char** argv){
 					pc += I;
 				break;
 			case 0x74 : // jmp   74iiiiii
-			  pc = I;
+				pc = I;
 				break;
 			case 0x80 : // movi  80xxcccc
 				R(1) = C;
@@ -316,7 +316,7 @@ int main(int args, char** argv){
 				break;
 			case 0xf0 : // halt  f0******
 				halt = 1;
-				printf("\n SUCCESS\n");
+				printf("\n SUCCESS\n\n");
 				break;
 			default :
 				printf("ERROR expected op-code in command %d", commandcounter);
@@ -324,24 +324,23 @@ int main(int args, char** argv){
 	  }
 	  pc += 1;
 	  if(debug == 4){
-	    for(i = 0; i < printnregs; ++i)
-	      sbuf[i + 6] = R(i - 3); // the pc got incremented before, so R(i + 1) has to be actually R(i  - 3)
-	    if(printflag)
-	      sbuf[11] = cmpflag;
-	    if(printpc)
-	      sbuf[13] = pc;
-	    for(i = 0; i < printnregs; ++i)
-	      printf("     r%2.2d : %8.8x/%8.8d -> %8.8x/%8.8d\n",
-		     sbuf[i], sbuf[i + 3], sbuf[i + 3], sbuf[i + 6], sbuf[i + 6]);
-	    if(printflag)
-	      printf(" cmpflag : %d ---> %d\n", sbuf[10], sbuf[11]);
-	    if(printpc)
-	      printf("      pc : %8.8x/%8.8d -> %8.8x/%8.8d\n",sbuf[12], sbuf[12], sbuf[13], sbuf[13]);
-	    printf("\n");
-	    //scanf("%c");
+		  for(i = 0; i < printnregs; ++i)
+			  sbuf[i + 6] = R(i - 3); // the pc got incremented before, so R(i + 1) has to be actually R(i  - 3)
+		  if(printflag)
+			  sbuf[11] = cmpflag;
+		  if(printpc)
+			  sbuf[13] = pc;
+		  for(i = 0; i < printnregs; ++i)
+			  printf("     r%2.2d : %8.8x/%8.8d -> %8.8x/%8.8d\n",
+					  sbuf[i], sbuf[i + 3], sbuf[i + 3], sbuf[i + 6], sbuf[i + 6]);
+		  if(printflag)
+			  printf(" cmpflag : %d ---> %d\n", sbuf[10], sbuf[11]);
+		  if(printpc)
+			  printf("      pc : %8.8x/%8.8d -> %8.8x/%8.8d\n",sbuf[12], sbuf[12], sbuf[13], sbuf[13]);
+		  scanf("%c");
 	  }
 	}
-	
+
 	// print regs
 	if(debug == 1 || debug == 3 || debug == 4){
 		for(i = 0; i < nreg; ++i){
@@ -373,8 +372,17 @@ int main(int args, char** argv){
 	}
 
 	// write to destination file
-	for(i = 0; i < ramsize; ++i)
-		fprintf(destination, "%c", ram[i]N);
+	for(i = 0; i < nreg; ++i){
+		if(i % 4 == 0)
+			fprintf(destination, "\n");
+		fprintf(destination, "|r%2.2d: %8.8x-%6.6d|", 
+				(i / 4) + (8 * (i % 4)), 
+				reg[(i / 4) + (8 * (i % 4))], 
+				reg[(i / 4) + (8 * (i % 4))]);
+	}
+	fprintf(destination, "\n");
+	//for(i = 0; i < ramsize; ++i)
+	//	fprintf(destination, "%c", ram[i]N);
 	if(ferror(destination)){
 		printf("ERROR writing %s\n", argv[2]);
 		exit(1);

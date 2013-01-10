@@ -1,0 +1,29 @@
+movi 0 50
+movi 1 -23
+movi 29 0
+
+cmpgt 0 29
+bf 2
+movi 28 1
+br 1
+movi 28 -1
+
+cmpgt 1 29
+bf 2
+addi 28 1
+br 1
+subi 28 1
+
+cmpe 28 29
+bf 2
+movi 28 -1
+br 1
+movi 28 1
+
+cmpgt 0 1
+bf 3
+sub 0 0 1
+add 29 29 28
+br -5
+
+halt
