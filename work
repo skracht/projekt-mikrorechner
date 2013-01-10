@@ -1,6 +1,6 @@
 #gcc -o t t.c
 #./t ollo.txt hallo.txt
 gcc -o compiler compiler.c
-./compiler fibo.txt lo.txt
+./compiler div.txt lo.txt
 gcc -o simulator simulator.c
 ./simulator lo.txt to.txt
