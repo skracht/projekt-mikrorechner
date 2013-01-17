@@ -3,7 +3,7 @@
 #include <malloc.h>
 #include <stdlib.h>
 #define nreg 32 
-#define debug 0
+#define debug 4
 #define N & 0xff
 #define R(a) reg[ram[(reg[30] * 4) + a] & 0xff]
 #define V(a) (ram[(reg[30] * 4) + a] & 0xff)
@@ -35,7 +35,7 @@ const char commands[] = {
 	0x71, // jsr   71iiiiii
 	0x72, // bt    72iiiiii
 	0x73, // bf    73iiiiii
-	0x74, // jmp   74iiiiii
+	0x74, // jmp   74xx****
 	0x80, // movi  80xxcccc
 	0x81, // addi  81xxcccc
 	0x82, // subi  82xxcccc
@@ -67,7 +67,7 @@ const char * commandformats[] = {
 	"     jsr : TODO",                           "71iiiiii", // TODO
         "      bt : if(%d) PC += %d + 1 else PC++",  "72iiiiii",
 	"      bf : if(%d) PC += %d + 1 else PC++",  "73iiiiii",
-	"     jmp : PC = %d + 1",                    "74iiiiii",
+	"     jmp : PC = r%d + 1",                   "74xx****",
 	"    movi : r%d = %d",                       "80xxcccc",
 	"    addi : r%d += %d",                      "81xxcccc",
 	"    subi : r%d -= %d",                      "82xxcccc",
@@ -99,7 +99,7 @@ const int commandargn[] = {
 	100, // jsr   71iiiiii
 	110, // bt    72iiiiii
 	110, // bf    73iiiiii
-	100, // jmp   74iiiiii
+	001, // jmp   74xx****
 	101, // movi  80xxcccc
 	101, // addi  81xxcccc
 	101, // subi  82xxcccc
@@ -291,8 +291,8 @@ int main(int args, char** argv){
 				if(!cmpflag)
 					pc += I;
 				break;
-			case 0x74 : // jmp   74iiiiii
-				pc = I;
+			case 0x74 : // jmp   74xx****
+				pc = R(1);
 				break;
 			case 0x80 : // movi  80xxcccc
 				R(1) = C;
@@ -325,7 +325,7 @@ int main(int args, char** argv){
 	  pc += 1;
 	  if(debug == 4){
 		  for(i = 0; i < printnregs; ++i)
-			  sbuf[i + 6] = R(i - 3); // the pc got incremented before, so R(i + 1) has to be actually R(i  - 3)
+			  printf("%d %d %d", R(i - 3), i, V(i - 3));//sbuf[i + 6] = R(i - 3); // the pc got incremented before, so R(i + 1) has to be actually R(i  - 3)
 		  if(printflag)
 			  sbuf[11] = cmpflag;
 		  if(printpc)

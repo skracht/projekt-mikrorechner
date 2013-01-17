@@ -29,7 +29,7 @@ const char * commands[] = {
 	"jsr",   "71iiiiii",
 	"bt",    "72iiiiii",
 	"bf",    "73iiiiii",
-	"jmp",   "74iiiiii",
+	"jmp",   "74xx****",
 	"movi",  "80xxcccc",
 	"addi",  "81xxcccc",
 	"subi",  "82xxcccc",

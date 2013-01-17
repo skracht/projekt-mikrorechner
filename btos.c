@@ -48,13 +48,18 @@ int main(int args, char** argv){
 	}
 
 	// write to destination file
+	fprintf(destination, "\"");
 	for(i = 0; i < filesize_source  * 8; ++i){
-		if(i % 8 == 0)
+		/*if(i % 8 == 0)
 			fprintf(destination, "%c", ' ');
 		if(i % 32 == 0)
 			fprintf(destination, "%c", '\n');
+		*/
+		if(i % 32 == 0 && i > 0)
+			fprintf(destination, "\",\n\"");
 		fprintf(destination, "%c", ((bin[i / 8] >> (7 - (i % 8))) & 0x1) + 48);
 	}
+	fprintf(destination, "\"");
 	fprintf(destination, "%c", '\n');
 	if(ferror(destination)){
 		printf("ERROR writing %s\n", argv[2]);

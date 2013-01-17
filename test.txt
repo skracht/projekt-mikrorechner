@@ -1,0 +1,6 @@
+movi 0 4
+jmp 0
+movi 2 -1
+br 1
+movi 1 1
+halt
