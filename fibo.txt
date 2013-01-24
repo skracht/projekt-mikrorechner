@@ -2,15 +2,18 @@ movi 4 10
 movi 3 0
 movi 0 0
 movi 1 1
+x
 cmpe 3 4
-bt 8
+bt y
 add 2 1 0
 cmpgt 0 1
-bf 2
+bf z
 mov 1 2
 bt 1
+z
 mov 0 2
 addi 3 1
-br -10
+br x
+y
 mov 7 2
 halt 
