@@ -47,8 +47,10 @@ int main(int args, char** argv){
 	int filesize_source;
 	char * str;
 	char ** words;
-	char ** identifiers;
+	char ** identifiersdestination;
+	char ** identifierssource;
 	int * memlines;
+	int * indexesbin;
 	char * bin;
 	int wordcounter;
 	const int ncommands = 29;
@@ -60,6 +62,7 @@ int main(int args, char** argv){
 	int k;
 	int l;
 	int m;
+	int n;
 
 	// open stream to source file
 	source = fopen(argv[1], "r");
@@ -101,8 +104,10 @@ int main(int args, char** argv){
 
 	// allocate memory for word list
 	words = malloc(sizeof(char *) * wordcounter);
-	identifiers = malloc(sizeof(char *) * wordcounter);
+	identifiersdestination = calloc(wordcounter, sizeof(char *));
+	identifierssource = calloc(wordcounter, sizeof(char *));
 	memlines = malloc(sizeof(int) * wordcounter);
+	indexesbin = malloc(sizeof(int) * wordcounter);
 
 	// divide string into words
 	j = 0;
@@ -113,6 +118,7 @@ int main(int args, char** argv){
 	// process input
 	l = 0;
 	m = 0;
+	n = 0;
 	commandcounter = 0;
 	for(i = 0; i < wordcounter; ++i){
 		for(j = 0; j < ncommands; ++j){	
@@ -141,9 +147,8 @@ int main(int args, char** argv){
 								printf(" rg %.2x", bin[l - 1] & 0xff);
 							break;
 						case 'i' :
-							if(words[i + 1][0] < 58 && words[i + 1][0] > 47){
+							if((words[i + 1][0] < 58 && words[i + 1][0] > 47) || words[i + 1][0] == 45){
 								if(atoi(words[i + 1]) < -iiiiii || atoi(words[i  + 1]) > iiiiii - 1){
-
 									printf("ERROR out of bounds immediate24 %d in %s-command command#: %d\n",
 											atoi(words[i + 1]), commands[j * 2], commandcounter);
 									exit(1);
@@ -152,8 +157,7 @@ int main(int args, char** argv){
 								bin[l++] = (buf & 0x00ff0000) >> 16;
 								bin[l++] = (buf & 0x0000ff00) >> 8;
 								bin[l++] = (buf & 0x000000ff);
-								k++;
-								k++;
+								k += 2;
 								if(debug == 2 || debug == 3){
 									printf(" ii %.2x", bin[l - 3] & 0xff);
 									printf(" ii %.2x", bin[l - 2] & 0xff);
@@ -162,8 +166,11 @@ int main(int args, char** argv){
 								}
 							}
 							else{
+								identifierssource[n] = words[++i];
+								indexesbin[n++] = l;
 								l += 3;
-							}// TODO	
+								k += 2;
+							}
 							break;
 						case 'c' :
 							if(atoi(words[i + 1]) < -cccc || atoi(words[i  + 1]) > cccc - 1){
@@ -203,8 +210,24 @@ int main(int args, char** argv){
 			}
 		}
 		if(j == ncommands){
-			identifiers[m] = words[i];
-			memlines[m++] = i;
+			identifiersdestination[m] = words[i];
+			memlines[m++] = commandcounter;
+		}
+	}
+	for(i = 0; i < n; ++i){
+		for(j = 0; j < m; ++j){	
+			if(!strcmp(identifiersdestination[j], identifierssource[i])){
+				l = indexesbin[i];
+				buf = memlines[j] - ((l + 3) / 4);
+				bin[l++] = (buf & 0x00ff0000) >> 16;
+				bin[l++] = (buf & 0x0000ff00) >> 8;
+				bin[l] = (buf & 0x000000ff);
+				break;
+			}
+		}
+		if(j == ncommands){
+			printf("ERROR %s is not set\n", identifierssource[i]);
+			exit(1);
 		}
 	}
 
