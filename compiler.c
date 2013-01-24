@@ -47,6 +47,8 @@ int main(int args, char** argv){
 	int filesize_source;
 	char * str;
 	char ** words;
+	char ** identifiers;
+	int * memlines;
 	char * bin;
 	int wordcounter;
 	const int ncommands = 29;
@@ -57,6 +59,7 @@ int main(int args, char** argv){
 	int j;
 	int k;
 	int l;
+	int m;
 
 	// open stream to source file
 	source = fopen(argv[1], "r");
@@ -73,6 +76,7 @@ int main(int args, char** argv){
 	// allocate memory	
 	str = malloc((sizeof(char) * filesize_source) + 1);
 	bin = calloc(filesize_source * 8, sizeof(char));
+	
 
 	// initiate str, count words and scan source file
 	str[0] = '\0';
@@ -97,6 +101,8 @@ int main(int args, char** argv){
 
 	// allocate memory for word list
 	words = malloc(sizeof(char *) * wordcounter);
+	identifiers = malloc(sizeof(char *) * wordcounter);
+	memlines = malloc(sizeof(int) * wordcounter);
 
 	// divide string into words
 	j = 0;
@@ -106,6 +112,7 @@ int main(int args, char** argv){
 
 	// process input
 	l = 0;
+	m = 0;
 	commandcounter = 0;
 	for(i = 0; i < wordcounter; ++i){
 		for(j = 0; j < ncommands; ++j){	
@@ -134,23 +141,29 @@ int main(int args, char** argv){
 								printf(" rg %.2x", bin[l - 1] & 0xff);
 							break;
 						case 'i' :
-							if(atoi(words[i + 1]) < -iiiiii || atoi(words[i  + 1]) > iiiiii - 1){
-								printf("ERROR out of bounds immediate24 %d in %s-command command#: %d\n",
-										atoi(words[i + 1]), commands[j * 2], commandcounter);
-								exit(1);
-							}
-							sscanf(words[++i], "%d", &buf);
-							bin[l++] = (buf & 0x00ff0000) >> 16;
-							bin[l++] = (buf & 0x0000ff00) >> 8;
-							bin[l++] = (buf & 0x000000ff);
-							k++;
-							k++;
-							if(debug == 2 || debug == 3){
-								printf(" ii %.2x", bin[l - 3] & 0xff);
-								printf(" ii %.2x", bin[l - 2] & 0xff);
-								printf(" ii %.2x", bin[l - 1] & 0xff);
+							if(words[i + 1][0] < 58 && words[i + 1][0] > 47){
+								if(atoi(words[i + 1]) < -iiiiii || atoi(words[i  + 1]) > iiiiii - 1){
 
+									printf("ERROR out of bounds immediate24 %d in %s-command command#: %d\n",
+											atoi(words[i + 1]), commands[j * 2], commandcounter);
+									exit(1);
+								}
+								sscanf(words[++i], "%d", &buf);
+								bin[l++] = (buf & 0x00ff0000) >> 16;
+								bin[l++] = (buf & 0x0000ff00) >> 8;
+								bin[l++] = (buf & 0x000000ff);
+								k++;
+								k++;
+								if(debug == 2 || debug == 3){
+									printf(" ii %.2x", bin[l - 3] & 0xff);
+									printf(" ii %.2x", bin[l - 2] & 0xff);
+									printf(" ii %.2x", bin[l - 1] & 0xff);
+
+								}
 							}
+							else{
+								l += 3;
+							}// TODO	
 							break;
 						case 'c' :
 							if(atoi(words[i + 1]) < -cccc || atoi(words[i  + 1]) > cccc - 1){
@@ -190,8 +203,8 @@ int main(int args, char** argv){
 			}
 		}
 		if(j == ncommands){
-			printf("undefined command \"%s\" in word %d", words[i], i + 1);
-			exit(1);
+			identifiers[m] = words[i];
+			memlines[m++] = i;
 		}
 	}
 
